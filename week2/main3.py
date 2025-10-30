@@ -4,23 +4,19 @@ from passlib.context import CryptContext
 
 app = FastAPI()
 
-# --- パスワードのハッシュ設定 ---
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# --- ユーザーモデル ---
 class User(BaseModel):
     username: str
     email: str
     password: str
 
-# --- 仮のDB（リストで代用） ---
 users_db = []
 
-# --- パスワードをハッシュ化する関数 ---
+
 def hash_password(password: str):
     return pwd_context.hash(password)
 
-# --- パスワードを検証する関数 ---
 def verify_password(plain_password: str, hashed_password: str):
     return pwd_context.verify(plain_password, hashed_password)
 
@@ -30,13 +26,13 @@ def register_user(user: User):
     for u in users_db:
         if u.email == user.email:
             raise HTTPException(status_code=400, detail="Email already registered")
-    # パスワードをハッシュ化して保存
+    
     hashed_pw = hash_password(user.password)
     user.password = hashed_pw
     users_db.append(user)
     return {"message": "User registered successfully"}
 
-# --- ユーザー一覧取得（デバッグ用）---
+# --- ユーザー一覧取得---
 @app.get("/users")
 def get_users():
     return users_db
